@@ -6,9 +6,20 @@ let package = Package(
     name: "Nautilus",
     platforms: [.macOS(.v13)],
     products: [
-        .executable(name: "nautilus-node", targets: ["Nautilus"])
+        .executable(name: "echo-legacy", targets: ["Legacy"]),
+        .executable(name: "echo", targets: ["Echo"])
     ],
     targets: [
-        .executableTarget(name: "Nautilus", path: "Sources"),
+        // This was the first attempt used for figuring out
+        // the protocol and making sure everything was set up correctly.
+        // Left here as a reference.
+        .executableTarget(name: "Legacy"),
+        
+        // This is the implementation of a simple node library
+        // used to more easily design nodes for the challenges.
+        .target(name: "Nautilus"),
+        
+        // These are the nodes solving each challenge.
+        .executableTarget(name: "Echo", dependencies: ["Nautilus"])
     ]
 )
