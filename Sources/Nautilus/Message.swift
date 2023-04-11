@@ -3,23 +3,23 @@
 
 /// The data structure of Maelstrom protocol messages.
 public struct Message: Codable {
-    public let source: String
-    public let destination: String
-    public let body: Body
+    public var source: String
+    public var destination: String
+    public var body: Body
     
     public struct Body: Codable {
-        public let kind: String
-        public let id: Int?
-        public let inReplyTo: Int?
-        public let nodeID: String?
-        public let nodeIDs: [String]?
-        public let echo: String?
-        public let code: Int?
-        public let text: String?
-        public let genID: Int?
-        public let message: Int?
-        public let messages: [Int]?
-        public let topology: [String: [String]]?
+        public var kind: String
+        public var id: Int?
+        public var inReplyTo: Int?
+        public var nodeID: String?
+        public var nodeIDs: [String]?
+        public var echo: String?
+        public var code: Int?
+        public var text: String?
+        public var genID: Int?
+        public var message: Int?
+        public var messages: [Int]?
+        public var topology: [String: [String]]?
     }
     
     /// The data structure of Maelstrom protocol messages.
