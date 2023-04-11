@@ -16,6 +16,8 @@ struct Echo: Node {
 }
 ```
 
+If you also want to do the challenges but are not interested in implementing the framework from scratch you can import this as a Swift package and use it for your own solutions.
+
 ### Challenges solved so far:
 - [x] 0 - Custom distributed framework
 - [x] 1 - Echo
