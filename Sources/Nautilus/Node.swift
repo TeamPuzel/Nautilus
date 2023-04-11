@@ -12,7 +12,7 @@ public protocol Node {
 
 /// A namespace to contain shared node state instead of passing
 /// around copies everywhere. Useful for performance reasons.
-public enum State {
+public enum Global {
     /// Current node ID.
     public static var id: String!
     /// Contains all known nodes including itself.
@@ -27,32 +27,60 @@ public enum State {
 
 public extension Node {
     static func main() async {
-        State.node = Self()
+        Global.node = Self()
         // First the rules need to be initialized
-        State.rules.merge(
-            State.node.rules.rules
+        Global.rules.merge(
+            Global.node.rules.rules
         ) { _, _ in fatalError("Duplicate rules, reason undefined") }
-        State.rules.merge(
-            State.node.internalRules.rules
+        Global.rules.merge(
+            Global.node.internalRules.rules
         ) { _, _ in fatalError("Duplicate rules, reason undefined") }
         
         // Then the node has to acknowledge ok status
         while true {
             let message = Message.poll()
             guard message.body.kind == "init" else { continue }
-            State.rules[message.body.kind]!(message).dispatch()
+            #if ASYNC
+            await Global.rules[message.body.kind]!(message)?.dispatch()
+            #else
+            Global.rules[message.body.kind]!(message).dispatch()
+            #endif
             break
         }
         
+        #if ASYNC
+        let messages = AsyncStream(Message.self) { continuation in
+            Task {
+                while true {
+                    continuation.yield(Message.poll())
+                }
+            }
+        }
+        
+        while true {
+            for await message in messages {
+                if let callback = Global.rules[message.body.kind] {
+                    Task {
+                        await callback(message)?.dispatch()
+                    }
+                } else {
+                    IO.error("Unknown message: \(message)")
+                }
+            }
+        }
+        
+        #else
         // Event loop
         while true {
             let message = Message.poll()
-            if let callback = State.rules[message.body.kind] {
+            if let callback = Global.rules[message.body.kind] {
                 callback(message).dispatch()
             } else {
                 IO.error("Unknown message: \(message)")
             }
         }
+        #endif
+        
     }
 }
 
@@ -62,8 +90,8 @@ public extension Node {
     @RuleSetBuilder
     var internalRules: RuleSet {
         Catch("init") { message in
-            State.id = message.body.nodeID!
-            State.nodes = message.body.nodeIDs!
+            Global.id = message.body.nodeID!
+            Global.nodes = message.body.nodeIDs!
             return message.reply(kind: "init_ok")
         }
     }
@@ -87,7 +115,7 @@ public struct Catch {
     // because only one thread can read or write to a file.
     //
     // But there is a downside, state will need to be synchronised.
-    public typealias Callback = (_ message: Message) -> Message
+    public typealias Callback = (_ message: Message) -> Message?
     
     let kind: String
     let callback: Callback
@@ -102,7 +130,7 @@ public struct RuleSetBuilder {
     public static func buildBlock(_ components: Catch...) -> RuleSet {
         var ruleSet = RuleSet()
         for component in components {
-            guard !State.rules.contains(where: { $0.key == component.kind }) else {
+            guard !Global.rules.contains(where: { $0.key == component.kind }) else {
                 fatalError("Duplicate rules not allowed: \(component.kind)")
             }
             guard !ruleSet.rules.contains(where: { $0.key == component.kind }) else {
@@ -114,3 +142,17 @@ public struct RuleSetBuilder {
     }
 }
 
+
+fileprivate var stateStorage: [String: Any] = [:]
+@propertyWrapper
+public struct State<T> {
+    let storage: String
+    public var wrappedValue: T {
+        get { stateStorage[storage] as! T }
+        nonmutating set { stateStorage[storage] = newValue }
+    }
+    public init(wrappedValue: T, _ key: String) {
+        stateStorage[key] = wrappedValue
+        self.storage = key
+    }
+}

@@ -8,7 +8,8 @@ let package = Package(
     products: [
         // .executable(name: "echo-legacy", targets: ["Legacy"]),
         .executable(name: "echo", targets: ["Echo"]),
-        .executable(name: "unique-id", targets: ["UniqueID"])
+        .executable(name: "unique-id", targets: ["UniqueID"]),
+        .executable(name: "broadcast", targets: ["Broadcast"])
     ],
     targets: [
         // This was the first attempt used for figuring out
@@ -18,10 +19,16 @@ let package = Package(
         
         // This is the implementation of a simple node library
         // used to more easily design nodes for the challenges.
-        .target(name: "Nautilus"),
+        .target(name: "Nautilus",
+            swiftSettings: [
+                // Comment out to disable async handling of messages
+                .define("ASYNC")
+            ]
+        ),
         
         // These are the nodes solving each challenge.
         .executableTarget(name: "Echo", dependencies: ["Nautilus"]),
-        .executableTarget(name: "UniqueID", dependencies: ["Nautilus"])
+        .executableTarget(name: "UniqueID", dependencies: ["Nautilus"]),
+        .executableTarget(name: "Broadcast", dependencies: ["Nautilus"])
     ]
 )

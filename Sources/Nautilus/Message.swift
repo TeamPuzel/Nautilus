@@ -17,6 +17,9 @@ public struct Message: Codable {
         public let code: Int?
         public let text: String?
         public let genID: Int?
+        public let message: Int?
+        public let messages: [Int]?
+        public let topology: [String: [String]]?
     }
     
     /// The data structure of Maelstrom protocol messages.
@@ -32,6 +35,8 @@ public struct Message: Codable {
     ///   - code: Error code.
     ///   - text: Text content of the message.
     ///   - genID: Generated ID for requests.
+    ///   - message: Broadcast message.
+    ///   - messages: Broadcast messages.
     public init(
         source: String,
         destination: String,
@@ -43,7 +48,10 @@ public struct Message: Codable {
         echo: String? = nil,
         code: Int? = nil,
         text: String? = nil,
-        genID: Int? = nil
+        genID: Int? = nil,
+        message: Int? = nil,
+        messages: [Int]? = nil,
+        topology: [String: [String]]? = nil
     ) {
         self.source = source
         self.destination = destination
@@ -56,7 +64,10 @@ public struct Message: Codable {
             echo: echo,
             code: code,
             text: text,
-            genID: genID
+            genID: genID,
+            message: message,
+            messages: messages,
+            topology: topology
         )
     }
     
@@ -73,21 +84,27 @@ public extension Message {
         echo: String? = nil,
         code: Int? = nil,
         text: String? = nil,
-        genID: Int? = nil
+        genID: Int? = nil,
+        message: Int? = nil,
+        messages: [Int]? = nil,
+        topology: [String: [String]]? = nil
     ) {
         
-        self.source = State.id
+        self.source = Global.id
         self.destination = destination
         self.body = Body(
             kind: kind,
             id: .random(in: 1...Int.max),
             inReplyTo: inReplyTo,
             nodeID: nil,
-            nodeIDs: sendNodeIDs ? State.nodes : nil,
+            nodeIDs: sendNodeIDs ? Global.nodes : nil,
             echo: echo,
             code: code,
             text: text,
-            genID: genID
+            genID: genID,
+            message: message,
+            messages: messages,
+            topology: topology
         )
     }
     
@@ -99,6 +116,8 @@ public extension Message {
     ///   - code: Error code.
     ///   - text: Text content of the message.
     ///   - genID: Generated ID for requests.
+    ///   - message: Broadcast message.
+    ///   - messages: Broadcast messages.
     /// - Returns: New instance of `Message` ready to be sent.
     func reply(
         kind: String,
@@ -106,7 +125,9 @@ public extension Message {
         echo: String? = nil,
         code: Int? = nil,
         text: String? = nil,
-        genID: Int? = nil
+        genID: Int? = nil,
+        message: Int? = nil,
+        messages: [Int]? = nil
     ) -> Message {
         Message(
             destination: self.source,
@@ -116,7 +137,9 @@ public extension Message {
             echo: echo,
             code: code,
             text: text,
-            genID: genID
+            genID: genID,
+            message: message,
+            messages: messages
         )
     }
 }
@@ -142,6 +165,9 @@ public extension Message.Body {
         case code
         case text
         case genID = "id"
+        case message
+        case messages
+        case topology
     }
 }
 
@@ -169,10 +195,18 @@ extension Message {
             }
         }
     }
-    static func dispatch(_ message: Message) {
+    public static func dispatch(_ message: Message) {
         IO.output(String(data: try! encoder.encode(message), encoding: .utf8)!)
     }
-    func dispatch() {
+    
+    #if ASYNC
+    @MainActor
+    public func dispatch() async {
         IO.output(String(data: try! encoder.encode(self), encoding: .utf8)!)
     }
+    #else
+    public func dispatch() {
+        IO.output(String(data: try! encoder.encode(self), encoding: .utf8)!)
+    }
+    #endif
 }
