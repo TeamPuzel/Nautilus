@@ -14,6 +14,9 @@ public struct Message: Codable {
         public let nodeID: String?
         public let nodeIDs: [String]?
         public let echo: String?
+        public let code: Int?
+        public let text: String?
+        public let genID: Int?
     }
     
     /// The data structure of Maelstrom protocol messages.
@@ -26,6 +29,9 @@ public struct Message: Codable {
     ///   - nodeID: Used to configure new nodes with an ID.
     ///   - nodeIDs: An array containing  IDs of all known nodes.
     ///   - echo: Echo message content.
+    ///   - code: Error code.
+    ///   - text: Text content of the message.
+    ///   - genID: Generated ID for requests.
     public init(
         source: String,
         destination: String,
@@ -34,7 +40,10 @@ public struct Message: Codable {
         inReplyTo: Int? = nil,
         nodeID: String? = nil,
         nodeIDs: [String]? = nil,
-        echo: String? = nil
+        echo: String? = nil,
+        code: Int? = nil,
+        text: String? = nil,
+        genID: Int? = nil
     ) {
         self.source = source
         self.destination = destination
@@ -44,7 +53,10 @@ public struct Message: Codable {
             inReplyTo: inReplyTo,
             nodeID: nodeID,
             nodeIDs: nodeIDs,
-            echo: echo
+            echo: echo,
+            code: code,
+            text: text,
+            genID: genID
         )
     }
     
@@ -58,7 +70,10 @@ public extension Message {
         kind: String,
         inReplyTo: Int? = nil,
         sendNodeIDs: Bool = false,
-        echo: String? = nil
+        echo: String? = nil,
+        code: Int? = nil,
+        text: String? = nil,
+        genID: Int? = nil
     ) {
         
         self.source = State.id
@@ -69,7 +84,10 @@ public extension Message {
             inReplyTo: inReplyTo,
             nodeID: nil,
             nodeIDs: sendNodeIDs ? State.nodes : nil,
-            echo: echo
+            echo: echo,
+            code: code,
+            text: text,
+            genID: genID
         )
     }
     
@@ -78,18 +96,27 @@ public extension Message {
     ///   - kind: Identifies the type of message to the receiver.
     ///   - sendNodeIDs: If the array of known nodes should be sent.
     ///   - echo: Echo message content.
+    ///   - code: Error code.
+    ///   - text: Text content of the message.
+    ///   - genID: Generated ID for requests.
     /// - Returns: New instance of `Message` ready to be sent.
     func reply(
         kind: String,
         sendNodeIDs: Bool = false,
-        echo: String? = nil
+        echo: String? = nil,
+        code: Int? = nil,
+        text: String? = nil,
+        genID: Int? = nil
     ) -> Message {
         Message(
             destination: self.source,
             kind: kind,
             inReplyTo: self.body.id,
             sendNodeIDs: sendNodeIDs,
-            echo: echo
+            echo: echo,
+            code: code,
+            text: text,
+            genID: genID
         )
     }
 }
@@ -112,6 +139,9 @@ public extension Message.Body {
         case nodeID = "node_id"
         case nodeIDs = "node_ids"
         case echo
+        case code
+        case text
+        case genID = "id"
     }
 }
 

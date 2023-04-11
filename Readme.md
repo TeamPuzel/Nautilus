@@ -30,8 +30,9 @@ Tested using the latest Swift 5.8 pre-release on macOS 13, should work on Linux 
 ### Challenges solved so far:
 - [x] 0a - Custom distributed framework
 - [ ] 0b - Async
+- [ ] 0c - Custom message declaration
 - [x] 1 - Echo
-- [ ] 2 - Unique ID Generation
+- [x] 2 - Unique ID Generation
 - [ ] 3 - Broadcast
 - [ ] 4 - Grow only counter
 - [ ] 5 - Kafka style log

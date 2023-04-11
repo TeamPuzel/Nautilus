@@ -6,8 +6,9 @@ let package = Package(
     name: "Nautilus",
     platforms: [.macOS(.v13)],
     products: [
-        .executable(name: "echo-legacy", targets: ["Legacy"]),
-        .executable(name: "echo", targets: ["Echo"])
+        // .executable(name: "echo-legacy", targets: ["Legacy"]),
+        .executable(name: "echo", targets: ["Echo"]),
+        .executable(name: "unique-id", targets: ["UniqueID"])
     ],
     targets: [
         // This was the first attempt used for figuring out
@@ -20,6 +21,7 @@ let package = Package(
         .target(name: "Nautilus"),
         
         // These are the nodes solving each challenge.
-        .executableTarget(name: "Echo", dependencies: ["Nautilus"])
+        .executableTarget(name: "Echo", dependencies: ["Nautilus"]),
+        .executableTarget(name: "UniqueID", dependencies: ["Nautilus"])
     ]
 )
