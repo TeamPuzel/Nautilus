@@ -2,17 +2,17 @@
 // MARK: - Definition
 
 struct Message: Codable {
-    let source: String
-    let destination: String
-    let body: Body
+    public let source: String
+    public let destination: String
+    public let body: Body
     
     struct Body: Codable {
-        let type: String
-        let id: Int?
-        let inReplyTo: Int?
-        let nodeID: String?
-        let nodeIDs: [String]?
-        let echo: String?
+        public let type: String
+        public let id: Int?
+        public let inReplyTo: Int?
+        public let nodeID: String?
+        public let nodeIDs: [String]?
+        public let echo: String?
         
         init(
             type: String,
