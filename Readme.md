@@ -34,7 +34,7 @@ Tested using the latest Swift 5.8 pre-release on macOS 13, should work on Linux 
 - [x] 3a - Broadcast
 - [x] 3b - Multinode broadcast (naive)
 - [ ] 3b+ - Multinode broadcast (optimized)
-- [ ] 3a - Fault tolerant broadcast
+- [ ] 3c - Fault tolerant broadcast
 - [ ] 4 - Grow only counter
 - [ ] 5 - Kafka style log
 - [ ] 6 - Totally available

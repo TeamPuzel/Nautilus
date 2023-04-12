@@ -108,13 +108,6 @@ public struct RuleSet {
 /// The main building block for declarative request programming.
 public struct Catch {
     
-    // TODO: Async!!
-    // This system could work based on a stream/channel,
-    // queueing messages but computing replies without waiting.
-    // That's the only kind of concurrency possible
-    // because only one thread can read or write to a file.
-    //
-    // But there is a downside, state will need to be synchronised.
     public typealias Callback = (_ message: Message) -> Message?
     
     let kind: String
